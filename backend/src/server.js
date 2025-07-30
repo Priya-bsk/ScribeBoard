@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv";
 import cors from "cors"
+import path from "path"
 
 import nodeRoutes from "./routes/notesRoutes.js"
 import {connectDB} from "./config/db.js";
@@ -10,7 +11,7 @@ dotenv.config();
 
 const app=express();
 const PORT = process.env.PORT || 5001;
-
+const __dirname=path.resolve()
 
 //Building APIs, Understanding Routes, endpoint(URL+HTTP method)
 app.get("/",(req,res)=>{
@@ -23,10 +24,21 @@ app.use(cors({
 app.use(express.json())
 app.use(rateLimiter);
 
-
+if(process.env.NODE_ENV!=="production"){
+    app.use(cors({
+    origin:"http://localhost:5173",
+}));
+}
 
 // api/notes is the endpoint
 app.use("/api/notes",nodeRoutes);
+if(process.env.NODE_ENV==="production"){
+    app.use(express.static(path.join(__dirname,"../frontent/dist")));
+app.get("*",(req,res)=>{
+    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
+});
+}
+
 connectDB().then(()=>{
     app.listen(PORT, ()=>{
         console.log("Server started on PORT:",PORT);
