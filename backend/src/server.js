@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors"
 import path from "path"
 
-import nodeRoutes from "./routes/notesRoutes.js"
+import notesRoutes from "./routes/notesRoutes.js"
 import {connectDB} from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 
@@ -12,32 +12,30 @@ dotenv.config();
 const app=express();
 const PORT = process.env.PORT || 5001;
 const __dirname=path.resolve()
-
-//Building APIs, Understanding Routes, endpoint(URL+HTTP method)
-app.get("/",(req,res)=>{
-    res.send("Server has been started");
-});
-app.use(cors({
-    origin:"http://localhost:5173",
-}));
-//Middleware ->Between req and res. 
-app.use(express.json())
-app.use(rateLimiter);
-
-if(process.env.NODE_ENV!=="production"){
+if(process.env.NODE_ENV != "production"){
     app.use(cors({
     origin:"http://localhost:5173",
 }));
 }
 
+
+//Middleware ->Between req and res. 
+app.use(express.json())
+app.use(rateLimiter);
+
+
+
 // api/notes is the endpoint
-app.use("/api/notes",nodeRoutes);
+app.use("/api/notes",notesRoutes);
 if(process.env.NODE_ENV==="production"){
-    app.use(express.static(path.join(__dirname,"../frontent/dist")));
+    app.use(express.static(path.join(__dirname,"../frontend/dist")));
 app.get("*",(req,res)=>{
     res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
 });
 }
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
 
 connectDB().then(()=>{
     app.listen(PORT, ()=>{
@@ -59,7 +57,10 @@ connectDB().then(()=>{
 //     console.log(`Req method is ${req.method} and req url is ${req.url}`);
 //     next();
 // })
-
+//Building APIs, Understanding Routes, endpoint(URL+HTTP method)
+// app.get("/",(req,res)=>{
+//     res.send("Server has been started");
+// });
 
 //    NOTES
 

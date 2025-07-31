@@ -22,3 +22,4 @@ export const RateLimitedUI = () => {
     </div>
   );
 };
+export default RateLimitedUI
